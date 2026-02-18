@@ -1,27 +1,30 @@
 import os
-from pyrogram import Client
-from flask import Flask
-from threading import Thread
+import asyncio
+from pyrogram import Client, filters
 
-# 1. Flask server banayenge jo Render ko lagega ki website chal rahi hai
-flask_app = Flask(__name__)
-@flask_app.route('/')
-def home():
-    return "Indiplex Engine is Running!"
+# Python 3.14+ compatibility fix
+try:
+    asyncio.get_running_loop()
+except RuntimeError:
+    asyncio.set_event_loop(asyncio.new_event_loop())
 
-def run_flask():
-    flask_app.run(host="0.0.0.0", port=8080)
+# Render ke Environment Variables se data uthana
+API_ID = 38525545  # [cite: 2026-02-14]
+API_HASH = "25d7cd7f859b83bfe1761fd93079fe63"  # [cite: 2026-02-14]
+BOT_TOKEN = os.environ.get("BOT_TOKEN")  #
+MONGO_URL = os.environ.get("MONGO_URL")  #
 
-# 2. Tera Bot Logic
-API_ID = 38525545
-API_HASH = "25d7cd7f859b83bfe1761fd93079fe63"
-BOT_TOKEN = "APNA_TOKEN_YAHAN_DALO"
+# Bot Client Setup
+app = Client(
+    "indiplex_bot",
+    api_id=API_ID,
+    api_hash=API_HASH,
+    bot_token=BOT_TOKEN
+)
 
-app = Client("indiplex_worker", api_id=API_ID, api_hash=API_HASH, bot_token=BOT_TOKEN)
+@app.on_message(filters.command("start"))
+async def start(client, message):
+    await message.reply_text("Ek Number Bhai! Indiplex Bot Live Hai. 🔥")
 
-if __name__ == "__main__":
-    # Flask ko alag thread mein chalao
-    Thread(target=run_flask).start()
-    # Bot ko start karo
-    print("Indiplex Bot is LIVE...")
-    app.run()
+print("Indiplex Bot is LIVE...")
+app.run()
